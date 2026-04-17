@@ -18,24 +18,26 @@ class devices extends Model
 
     protected $casts = [
         'last_seen_at' => 'datetime',
-        'is_online' => 'boolean',
     ];
 
-    public function getHasPowerAttribute(): bool
+    protected $appends = ['is_online'];
+
+    public function getIsOnlineAttribute(): bool
     {
-        if (!$this->last_seen_at) {
+        if (!$this->last_seen_at && !$this->is_online) {
             return false;
+        } else {
+            return $this->last_seen_at->greaterThan(now()->subSeconds(30));
         }
 
-        return $this->last_seen_at->greaterThan(now()->subMinutes(2));
     }
 
     /**
      * Scope to quickly find devices that have gone silent (Outage)
      */
-    public function scopePendingOutage($query)
+    public function getHasPowerAttribute(): bool
     {
-        return $query->where('is_online', true)
-                     ->where('last_seen_at', '<', now()->subMinutes(2));
+        // If it pings within 5 seconds, we assume it has power.
+        return $this->getIsOnlineAttribute();
     }
 }

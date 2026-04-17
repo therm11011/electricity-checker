@@ -14,13 +14,13 @@ Route::get('/monitors', function () {
 Route::post('/heartbeat', function (Request $request) {
     $data = $request->validate([
         'device_name' => 'required|string',
-        'mac_address' => 'required|string|unique:devices,mac_address',
+        'mac_address' => 'required|string',
     ]);
 
     $device = Devices::updateOrCreate(
         ['mac_address' => $data['mac_address']],
         ['device_name' => $data['device_name'], 'last_seen_at' => now(), 'is_online' => true]
     );
-
+    broadcast(new \App\Events\UpdateDeviceStatus($device));
     return response()->json(['message' => 'Heartbeat received', 'device' => $device], 200);
 });

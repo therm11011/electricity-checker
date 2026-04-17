@@ -18,8 +18,8 @@ class CheckPowerStatus extends Command
     public function handle()
     {
         $this->info('Checking power...');
-        // If a device hasn't been seen in 2 minutes, it's likely a power outage
-        $threshold = now()->subMinutes(1);
+        // If a device hasn't been seen in 15 seconds, it's likely a power outage
+        $threshold = now()->subMinutes(2);
 
 
         $offlineDevices = devices::where('is_online', true)
